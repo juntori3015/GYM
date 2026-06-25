@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GYM MAP</title>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3460058387565786" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -18,7 +20,7 @@
       user-select: none;
     }
     header { text-align: center; padding: 2rem 1rem 0.8rem; }
-    header h1 { font-size: 2.4rem; font-weight: 900; letter-spacing: 6px; color: var(--accent); }
+    header h1 { font-family: 'Press Start 2P', monospace; font-size: 1.8rem; letter-spacing: 4px; color: var(--accent); }
     header p { font-size: 1.05rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 2px; }
     .hint { text-align: center; font-size: 0.95rem; color: var(--muted); margin: 0.6rem 0; }
     .map-controls { display: flex; justify-content: center; margin-bottom: 0.8rem; }
@@ -97,6 +99,12 @@
     .modal-icon svg { width: 100%; height: 100%; }
     .modal-name   { font-size: 1.8rem; font-weight: 900; }
     .modal-target { font-size: 1rem; color: var(--accent); margin-top: 0.3rem; }
+    .modal-stat-badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.6rem; }
+    .stat-badge {
+      font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
+      padding: 0.2rem 0.45rem; border-radius: 2px; letter-spacing: 1px;
+      border: 1px solid currentColor;
+    }
     .close-btn {
       background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted);
       font-size: 1.2rem; cursor: pointer; padding: 0.3rem 0.7rem; border-radius: 4px;
@@ -264,6 +272,67 @@
     }
     .menu-clear-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+    /* PIXEL FONT OVERRIDES */
+    .diagram-label { font-family: 'Press Start 2P', monospace; }
+    .section-tag { font-family: 'Press Start 2P', monospace; font-size: 0.5rem; }
+    .menu-panel-header h2 { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; }
+    .set-rep-group label { font-family: 'Press Start 2P', monospace; font-size: 0.4rem; }
+
+    /* CHARACTER DISPLAY */
+    .char-display {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.4); display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .char-sprite { width: 72px; flex-shrink: 0; image-rendering: pixelated; }
+    .char-sprite svg { width: 100%; height: auto; display: block; }
+    .char-level {
+      font-family: 'Press Start 2P', monospace; font-size: 0.65rem;
+      color: var(--accent); margin-bottom: 0.8rem; letter-spacing: 1px;
+    }
+    .muscle-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+    .muscle-bar-row { display: flex; align-items: center; gap: 0.5rem; }
+    .muscle-bar-label {
+      font-family: 'Press Start 2P', monospace; font-size: 0.45rem;
+      color: var(--muted); width: 34px; flex-shrink: 0;
+    }
+    .muscle-bar-track {
+      flex: 1; height: 7px; background: var(--bg); border: 1px solid var(--border);
+    }
+    .muscle-bar-fill { height: 100%; transition: width 0.4s; }
+    .muscle-bar-lv {
+      font-family: 'Press Start 2P', monospace; font-size: 0.45rem; min-width: 16px; text-align: right;
+    }
+
+    /* COMPLETE SET BUTTON (in menu panel) */
+    .menu-item-complete-btn {
+      width: 100%; margin-top: 0.5rem;
+      background: transparent; border: 2px solid #333;
+      color: var(--muted); font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem; padding: 0.6rem; cursor: pointer;
+      letter-spacing: 1px; transition: all 0.1s; border-radius: 0;
+    }
+    .menu-item-complete-btn:hover { border-color: var(--accent); color: var(--text); }
+    .menu-item-complete-btn:active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* LEVEL UP NOTIFICATION */
+    .levelup-notif {
+      position: fixed; top: 40%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card); border: 3px solid var(--accent);
+      padding: 1.5rem 2rem; z-index: 600; text-align: center;
+      font-family: 'Press Start 2P', monospace; display: none;
+      box-shadow: 4px 4px 0 rgba(230,57,70,0.5), 8px 8px 0 rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+    .levelup-notif.show { display: block; animation: pixel-pop 0.35s ease; }
+    @keyframes pixel-pop {
+      0%  { transform: translate(-50%,-50%) scale(0.4); opacity: 0; }
+      65% { transform: translate(-50%,-50%) scale(1.1); opacity: 1; }
+      100%{ transform: translate(-50%,-50%) scale(1); }
+    }
+    .levelup-title { font-size: 0.75rem; color: var(--accent); letter-spacing: 3px; margin-bottom: 0.6rem; }
+    .levelup-detail { font-size: 0.55rem; color: var(--text); letter-spacing: 2px; }
+
     /* FOOTER */
     footer {
       text-align: center; padding: 1.5rem 1rem;
@@ -323,6 +392,7 @@
         <span class="modal-icon" id="m-icon"></span>
         <div class="modal-name" id="m-name"></div>
         <div class="modal-target" id="m-target"></div>
+        <div class="modal-stat-badges" id="m-stat-badges"></div>
       </div>
       <button class="close-btn" onclick="closeModal()">✕</button>
     </div>
@@ -440,6 +510,12 @@
   </div>
 </div>
 
+<!-- LEVEL UP NOTIFICATION -->
+<div class="levelup-notif" id="levelup-notif">
+  <div class="levelup-title">LEVEL UP!</div>
+  <div class="levelup-detail" id="levelup-detail">CHEST  LV.1</div>
+</div>
+
 <!-- MENU FAB -->
 <button class="menu-fab" onclick="toggleMenuPanel()" aria-label="ワークアウトメニュー">
   📋
@@ -451,6 +527,13 @@
   <div class="menu-panel-header">
     <h2>TODAY'S MENU</h2>
     <button class="menu-panel-close" onclick="toggleMenuPanel()">✕</button>
+  </div>
+  <div class="char-display">
+    <div class="char-sprite" id="char-sprite"></div>
+    <div class="char-stats">
+      <div class="char-level" id="char-level-text">LV. 0</div>
+      <div class="muscle-bars" id="char-stats-bars"></div>
+    </div>
   </div>
   <div class="menu-list" id="menuList">
     <div class="menu-empty" id="menuEmpty">まだマシンが追加されていません</div>
@@ -589,6 +672,11 @@ function openModal(key) {
   document.getElementById('m-icon').innerHTML   = ICONS[key] || d.icon;
   document.getElementById('m-name').textContent   = d.name;
   document.getElementById('m-target').textContent = d.target;
+  const affectedGroups = [...new Set(d.muscles.map(m => MUSCLE_CLASS_MAP[m]).filter(Boolean))];
+  document.getElementById('m-stat-badges').innerHTML = affectedGroups.map(g => {
+    const mg = MUSCLE_GROUPS[g];
+    return `<span class="stat-badge" style="color:${mg.color};border-color:${mg.color};background:${mg.color}22">${mg.label} ↑</span>`;
+  }).join('');
   document.getElementById('m-steps').innerHTML    = d.steps.map((s, i) =>
     `<li><span class="step-n">${i+1}</span><span>${s}</span></li>`).join('');
   document.getElementById('m-tip-text').textContent = d.tip;
@@ -726,6 +814,7 @@ function renderMenu() {
         <label>REPS</label>
         <input type="number" min="1" max="100" value="${item.reps}" onchange="updateItemValue('${item.key}','reps',this.value)">
       </div>
+      <button class="menu-item-complete-btn" onclick="completeSetForMenu('${item.key}', this)">▶ SET COMPLETE</button>
     `;
     list.appendChild(div);
   });
@@ -747,6 +836,317 @@ closeModal = function() {
 };
 
 loadMenu();
+
+// ===== PIXEL CHARACTER =====
+const MUSCLE_GROUPS = {
+  chest:     { label: 'CHEST', color: '#e63946', classes: ['m-chest'] },
+  back:      { label: 'BACK',  color: '#4a90d9', classes: ['m-lat', 'm-trap', 'm-lower-back'] },
+  shoulders: { label: 'SHLD',  color: '#f4a261', classes: ['m-shoulder'] },
+  arms:      { label: 'ARMS',  color: '#2ec4b6', classes: ['m-bicep', 'm-tricep', 'm-tricep-b'] },
+  legs:      { label: 'LEGS',  color: '#8b5cf6', classes: ['m-quad', 'm-glute', 'm-glute-f', 'm-hamstring', 'm-calf', 'm-calf-b'] },
+  core:      { label: 'CORE',  color: '#10b981', classes: ['m-abs'] },
+};
+
+const MUSCLE_CLASS_MAP = {};
+Object.entries(MUSCLE_GROUPS).forEach(([g, d]) => d.classes.forEach(c => MUSCLE_CLASS_MAP[c] = g));
+
+const LEVEL_XP = [0, 5, 15, 30, 50];
+
+let charData    = { chest:0, back:0, shoulders:0, arms:0, legs:0, core:0 };
+let lastTrained = {};
+let decayLog    = {}; // {group: totalDecayDaysApplied}
+
+const TRAIN_INTERVAL_DAYS = 2; // 同部位の最短トレ間隔（日）
+const DECAY_GRACE_DAYS    = 7; // 退化開始までの猶予（日）
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function daysSince(dateStr) {
+  if (!dateStr) return 999;
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const past = new Date(y, m-1, d);
+  const now  = new Date(); now.setHours(0,0,0,0);
+  return Math.floor((now - past) / 86400000);
+}
+function loadCharData() {
+  try { Object.assign(charData,   JSON.parse(localStorage.getItem('charData')          || '{}')); } catch(e) {}
+  try { Object.assign(lastTrained,JSON.parse(localStorage.getItem('charLastTrained')   || '{}')); } catch(e) {}
+  try { Object.assign(decayLog,   JSON.parse(localStorage.getItem('charDecayLog')      || '{}')); } catch(e) {}
+}
+function saveCharData() {
+  localStorage.setItem('charData',         JSON.stringify(charData));
+  localStorage.setItem('charLastTrained',  JSON.stringify(lastTrained));
+  localStorage.setItem('charDecayLog',     JSON.stringify(decayLog));
+}
+function applyDecay() {
+  let changed = false;
+  Object.keys(charData).forEach(g => {
+    const days = daysSince(lastTrained[g]);
+    if (days > DECAY_GRACE_DAYS) {
+      const totalOwed  = days - DECAY_GRACE_DAYS;
+      const alreadyDid = decayLog[g] || 0;
+      const extra      = totalOwed - alreadyDid;
+      if (extra > 0) {
+        charData[g]  = Math.max(0, charData[g] - extra);
+        decayLog[g]  = totalOwed;
+        changed = true;
+      }
+    }
+  });
+  if (changed) saveCharData();
+}
+
+function getLevel(exp) {
+  for (let i = LEVEL_XP.length-1; i >= 0; i--) if (exp >= LEVEL_XP[i]) return i;
+  return 0;
+}
+function getProgress(exp) {
+  const lv = getLevel(exp);
+  if (lv >= LEVEL_XP.length-1) return 1;
+  return (exp - LEVEL_XP[lv]) / (LEVEL_XP[lv+1] - LEVEL_XP[lv]);
+}
+
+function completeSetForMenu(key, btn) {
+  const d = DATA[key];
+  if (!d) return;
+  const groups = [...new Set(d.muscles.map(m => MUSCLE_CLASS_MAP[m]).filter(Boolean))];
+  const today = todayStr();
+  const prevLevels = {};
+  Object.keys(charData).forEach(g => prevLevels[g] = getLevel(charData[g]));
+
+  const newGroups = groups.filter(g => daysSince(lastTrained[g]) >= TRAIN_INTERVAL_DAYS);
+  if (newGroups.length === 0) {
+    if (btn) {
+      const orig = btn.textContent;
+      const wait = TRAIN_INTERVAL_DAYS - daysSince(lastTrained[groups[0]]);
+      btn.textContent = `${wait}日後 ✓`;
+      btn.style.cssText = 'background:#555;color:#aaa;border-color:#555';
+      setTimeout(() => { btn.textContent = orig; btn.style.cssText = ''; }, 1400);
+    }
+    return;
+  }
+
+  newGroups.forEach(g => { charData[g]++; lastTrained[g] = today; decayLog[g] = 0; });
+  saveCharData();
+  renderCharDisplay();
+  const levelUp = newGroups.find(g => getLevel(charData[g]) > prevLevels[g]);
+  if (levelUp) showLevelUp(levelUp);
+  else if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = '✓ DONE!';
+    btn.style.cssText = 'background:var(--accent);color:#fff;border-color:var(--accent)';
+    setTimeout(() => { btn.textContent = orig; btn.style.cssText = ''; }, 900);
+  }
+}
+
+function showLevelUp(group) {
+  const notif = document.getElementById('levelup-notif');
+  const detail = document.getElementById('levelup-detail');
+  if (!notif) return;
+  const g = MUSCLE_GROUPS[group];
+  detail.textContent = `${g.label}  LV.${getLevel(charData[group])}`;
+  notif.classList.add('show');
+  setTimeout(() => notif.classList.remove('show'), 2500);
+}
+
+// ── Monster pixel renderer ──────────────────────────────
+const _SP = 6;
+function _shade(hex, amt) {
+  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,v+amt)).toString(16).padStart(2,'0')).join('');
+}
+function _mkSVG(rs, gw, gh, sc) {
+  return `<svg width="${Math.round(gw*_SP*sc)}" height="${Math.round(gh*_SP*sc)}" viewBox="0 0 ${gw*_SP} ${gh*_SP}" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block">${rs.join('')}</svg>`;
+}
+function _dot(rs, c, r, fill, GW, GH) {
+  if (c<0||r<0||c>=GW||r>=GH) return;
+  rs.push(`<rect x="${c*_SP}" y="${r*_SP}" width="${_SP}" height="${_SP}" fill="${fill}"/>`);
+}
+function _hline(rs, c, r, w, fill, GW, GH) { for(let i=0;i<w;i++) _dot(rs,c+i,r,fill,GW,GH); }
+function _rect(rs, c, r, w, h, fill, GW, GH) { for(let j=0;j<h;j++) _hline(rs,c,r+j,w,fill,GW,GH); }
+
+function renderMonster(opts, scale, gw, gh) {
+  gw = gw||32; gh = gh||36; scale = scale||1;
+  const {
+    color='#5bc8ff', bodyW=12, bodyH=8,
+    hornLv=0, armLv=0, legLv=0, backLv=0, eyeStyle='normal',
+  } = opts||{};
+  const GW=gw, GH=gh;
+  const rs=[];
+  const BODY=color, DARK=_shade(color,-50), LIGHT=_shade(color,+40);
+  const EYE = eyeStyle==='red'?'#ff3333':eyeStyle==='glow'?'#ffe84a':'#0a1520';
+  const ARM_C=_shade(color,-35), LEG_C=_shade(color,-30);
+  const HORN_C='#ff4444', HORN_TIP='#ff9999';
+
+  const hornSpace = hornLv>=4?8:hornLv===3?6:hornLv===2?4:hornLv===1?2:1;
+  const bx=Math.floor((GW-bodyW)/2), bTop=hornSpace;
+
+  if (hornLv===1) {
+    _hline(rs, bx+Math.floor(bodyW/2)-1, bTop-1, 2, HORN_C, GW, GH);
+  } else if (hornLv===2) {
+    const hx=bx+Math.floor(bodyW/2)-1;
+    _dot(rs,hx,bTop-3,HORN_TIP,GW,GH); _dot(rs,hx+1,bTop-3,HORN_TIP,GW,GH);
+    _hline(rs,hx,bTop-2,2,HORN_C,GW,GH); _hline(rs,hx-1,bTop-1,4,HORN_C,GW,GH);
+  } else if (hornLv===3) {
+    const cx=Math.floor(GW/2);
+    [{x:cx-3,w:3},{x:cx-5,w:3},{x:cx-6,w:2},{x:cx-7,w:2},{x:cx-8,w:1}].forEach((h,i)=>{
+      const c=i>=3?HORN_TIP:HORN_C;
+      _hline(rs,h.x,bTop-1-i,h.w,c,GW,GH); _hline(rs,GW-h.x-h.w,bTop-1-i,h.w,c,GW,GH);
+    });
+  } else if (hornLv>=4) {
+    const cx=Math.floor(GW/2);
+    [{x:cx-3,w:4},{x:cx-5,w:4},{x:cx-8,w:3},{x:cx-10,w:3},{x:cx-12,w:2},{x:cx-13,w:2},{x:cx-13,w:1}].forEach((h,i)=>{
+      const c=i>=5?HORN_TIP:HORN_C;
+      _hline(rs,h.x,bTop-1-i,h.w,c,GW,GH); _hline(rs,GW-h.x-h.w,bTop-1-i,h.w,c,GW,GH);
+    });
+    for(let i=1;i<5;i++){
+      _hline(rs,cx-2-i,bTop-i,1,_shade(HORN_C,+20),GW,GH);
+      _hline(rs,cx+1+i,bTop-i,1,_shade(HORN_C,+20),GW,GH);
+    }
+  }
+
+  _hline(rs,bx+2,bTop,bodyW-4,BODY,GW,GH);
+  _hline(rs,bx+1,bTop+1,bodyW-2,BODY,GW,GH);
+  _rect(rs,bx,bTop+2,bodyW,bodyH-2,BODY,GW,GH);
+  _hline(rs,bx+2,bTop+1,3,LIGHT,GW,GH);
+  const bBot=bTop+bodyH;
+
+  const eyeRow=bTop+3, eyeW=eyeStyle==='normal'?2:3;
+  _rect(rs,bx+2,eyeRow,eyeW,2,EYE,GW,GH);
+  _rect(rs,bx+bodyW-2-eyeW,eyeRow,eyeW,2,EYE,GW,GH);
+  if (eyeStyle==='glow') { _dot(rs,bx+2,eyeRow,'#fff8cc',GW,GH); _dot(rs,bx+bodyW-2-eyeW,eyeRow,'#fff8cc',GW,GH); }
+  if (eyeStyle==='multi') { const ex=bx+Math.floor(bodyW/2)-1; _rect(rs,ex,eyeRow-1,2,2,EYE,GW,GH); }
+
+  if (backLv===0) {
+    // flat
+  } else if (backLv===1) {
+    _hline(rs,bx+1,bBot+1,bodyW-2,BODY,GW,GH); _hline(rs,bx+2,bBot+2,bodyW-4,BODY,GW,GH);
+    _hline(rs,bx+3,bBot+3,bodyW-6,BODY,GW,GH); _hline(rs,bx+4,bBot+4,bodyW-8,BODY,GW,GH);
+  } else if (backLv===2) {
+    _hline(rs,bx+2,bBot+1,bodyW-4,BODY,GW,GH); _hline(rs,bx+3,bBot+2,bodyW-6,BODY,GW,GH);
+    _hline(rs,bx+4,bBot+3,bodyW-8,BODY,GW,GH); _hline(rs,bx+5,bBot+4,2,BODY,GW,GH);
+  } else if (backLv===3) {
+    _hline(rs,bx+3,bBot+1,bodyW-6,BODY,GW,GH); _hline(rs,bx+4,bBot+2,bodyW-8,BODY,GW,GH);
+    _hline(rs,bx+5,bBot+3,bodyW-10,BODY,GW,GH);
+    const mid=bx+Math.floor(bodyW/2); _hline(rs,mid-1,bBot+4,2,BODY,GW,GH); _dot(rs,mid,bBot+5,BODY,GW,GH);
+  } else if (backLv>=4) {
+    _hline(rs,bx+3,bBot+1,bodyW-6,BODY,GW,GH); _hline(rs,bx+5,bBot+2,bodyW-10,BODY,GW,GH);
+    _hline(rs,bx+6,bBot+3,bodyW-12,BODY,GW,GH);
+    const mid=bx+Math.floor(bodyW/2); _hline(rs,mid-1,bBot+4,2,BODY,GW,GH);
+    _dot(rs,mid,bBot+5,BODY,GW,GH); _dot(rs,mid,bBot+6,DARK,GW,GH); _dot(rs,mid,bBot+7,_shade(DARK,-20),GW,GH);
+  }
+  if (backLv===0) { _hline(rs,bx,bBot,bodyW,BODY,GW,GH); } else { _hline(rs,bx+1,bBot,bodyW-2,BODY,GW,GH); }
+
+  const ARM_MAP = {
+    1:[{r:-1,p:[{c:0,t:'A'}]},{r:0,p:[{c:0,t:'A'}]},{r:1,p:[{c:0,t:'A'}]}],
+    2:[{r:-2,p:[{c:1,t:'H'}]},{r:-1,p:[{c:0,t:'A'},{c:1,t:'A'}]},{r:0,p:[{c:0,t:'A'},{c:1,t:'A'}]},{r:1,p:[{c:0,t:'A'},{c:1,t:'A'}]},{r:2,p:[{c:1,t:'H'}]}],
+    3:[
+      {r:-4,p:[{c:1,t:'H'}]},{r:-3,p:[{c:0,t:'A'},{c:1,t:'A'}]},
+      {r:-2,p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'}]},
+      {r:-1,p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'D'}]},
+      {r:0, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'},{c:6,t:'D'}]},
+      {r:1, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'D'}]},
+      {r:2, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'}]},
+      {r:3, p:[{c:0,t:'A'},{c:1,t:'A'}]},{r:4,p:[{c:1,t:'H'}]},
+    ],
+    4:[
+      {r:-7,p:[{c:4,t:'H'}]},{r:-6,p:[{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'}]},
+      {r:-5,p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'}]},
+      {r:-4,p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'D'}]},
+      {r:-3,p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'},{c:6,t:'A'}]},
+      {r:-2,p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'},{c:6,t:'A'},{c:7,t:'A'}]},
+      {r:-1,p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'},{c:6,t:'A'},{c:7,t:'A'},{c:8,t:'D'}]},
+      {r:0, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'},{c:6,t:'A'},{c:7,t:'A'},{c:8,t:'A'},{c:9,t:'D'}]},
+      {r:1, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'},{c:6,t:'A'},{c:7,t:'A'},{c:8,t:'D'}]},
+      {r:2, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'},{c:6,t:'A'},{c:7,t:'A'}]},
+      {r:3, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'},{c:6,t:'A'}]},
+      {r:4, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'D'}]},
+      {r:5, p:[{c:0,t:'A'},{c:1,t:'A'},{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'},{c:5,t:'A'}]},
+      {r:6, p:[{c:2,t:'A'},{c:3,t:'A'},{c:4,t:'A'}]},{r:7,p:[{c:4,t:'H'}]},
+    ],
+  };
+  const midRow=bTop+Math.floor(bodyH/2);
+  if (armLv>0 && ARM_MAP[armLv]) {
+    ARM_MAP[armLv].forEach(row=>{
+      row.p.forEach(p=>{
+        const col=p.t==='A'?ARM_C:p.t==='D'?DARK:_shade(ARM_C,+55);
+        _dot(rs,bx+bodyW+p.c,midRow+row.r,col,GW,GH);
+        _dot(rs,bx-1-p.c,   midRow+row.r,col,GW,GH);
+      });
+    });
+  }
+
+  const legBase=bBot+(backLv>=3?6:backLv>=1?4:5);
+  if (legLv===1) {
+    _rect(rs,bx+2,legBase,3,2,LEG_C,GW,GH); _rect(rs,bx+bodyW-5,legBase,3,2,LEG_C,GW,GH);
+  } else if (legLv===2) {
+    _rect(rs,bx+1,legBase,3,3,LEG_C,GW,GH); _rect(rs,bx+bodyW-4,legBase,3,3,LEG_C,GW,GH);
+    _hline(rs,bx,legBase+3,4,LEG_C,GW,GH); _hline(rs,bx+bodyW-5,legBase+3,4,LEG_C,GW,GH);
+  } else if (legLv===3) {
+    _rect(rs,bx+1,legBase,4,4,LEG_C,GW,GH); _rect(rs,bx+bodyW-5,legBase,4,4,LEG_C,GW,GH);
+    _hline(rs,bx-1,legBase+4,5,LEG_C,GW,GH); _hline(rs,bx+bodyW-5,legBase+4,5,LEG_C,GW,GH);
+  } else if (legLv>=4) {
+    _rect(rs,bx+1,legBase,5,5,LEG_C,GW,GH); _rect(rs,bx+bodyW-6,legBase,5,5,LEG_C,GW,GH);
+    _hline(rs,bx-1,legBase+5,6,LEG_C,GW,GH); _hline(rs,bx+bodyW-6,legBase+5,6,LEG_C,GW,GH);
+    for(let i=0;i<3;i++){
+      _dot(rs,bx-1+i*2,legBase+6,DARK,GW,GH); _dot(rs,bx+bodyW-1+i*2-6,legBase+6,DARK,GW,GH);
+    }
+  }
+
+  return _mkSVG(rs, GW, GH, scale);
+}
+
+function renderCharDisplay() {
+  const spriteEl = document.getElementById('char-sprite');
+  const barsEl   = document.getElementById('char-stats-bars');
+  const levelEl  = document.getElementById('char-level-text');
+  if (!spriteEl) return;
+
+  const lv = g => getLevel(charData[g]);
+  let totalLevel = 0;
+  Object.keys(charData).forEach(g => totalLevel += lv(g));
+  const overall = Math.floor(totalLevel / Object.keys(charData).length);
+
+  const CORE_COLORS = ['#5bc8ff','#40ff90','#cc44ff','#ff7733','#ff1a4a'];
+  const CHEST_W     = [12,14,17,20,24];
+  const CHEST_H     = [8, 10,12,14,17];
+  const chestLv=lv('chest'), armLv=lv('arms'), shlLv=lv('shoulders'), coreLv=lv('core');
+  let eyeStyle='normal';
+  if      (armLv>=4 && shlLv>=4 && coreLv>=4) eyeStyle='multi';
+  else if (shlLv>=4 || coreLv>=4)              eyeStyle='red';
+  else if (armLv>=4)                            eyeStyle='glow';
+  const monsterOpts = {
+    color:  CORE_COLORS[coreLv],
+    bodyW:  CHEST_W[chestLv],
+    bodyH:  CHEST_H[chestLv],
+    hornLv: shlLv,
+    armLv,
+    legLv:  lv('legs'),
+    backLv: lv('back'),
+    eyeStyle,
+  };
+  const spriteGW = armLv>=4 ? 50 : 32;
+  spriteEl.innerHTML = renderMonster(monsterOpts, 1, spriteGW, 38);
+  if (levelEl) levelEl.textContent = `LV. ${overall}`;
+
+  if (barsEl) {
+    barsEl.innerHTML = Object.entries(MUSCLE_GROUPS).map(([g, d]) => {
+      const lv = getLevel(charData[g]);
+      const prog = getProgress(charData[g]);
+      return `<div class="muscle-bar-row">
+        <span class="muscle-bar-label">${d.label}</span>
+        <div class="muscle-bar-track"><div class="muscle-bar-fill" style="width:${prog*100}%;background:${d.color}"></div></div>
+        <span class="muscle-bar-lv" style="color:${d.color}">${lv}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+loadCharData();
+applyDecay();
+renderCharDisplay();
 </script>
 </body>
 </html>
