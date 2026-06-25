@@ -131,6 +131,16 @@
     .body-svg .bp { fill: #272727; stroke: #3e3e3e; stroke-width: 0.8; }
     .body-svg .mr { fill: transparent; transition: fill 0.2s; }
     .body-svg .mr.active { fill: rgba(230,57,70,0.78); }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 1.5rem 1rem;
+      border-top: 1px solid #2a2a2a;
+      color: #666; font-size: 0.85rem; letter-spacing: 1px;
+    }
+    footer a { color: #666; text-decoration: none; transition: color 0.15s; }
+    footer a:hover { color: #e63946; }
+    footer .sep { margin: 0 0.8rem; }
   </style>
 </head>
 <body>
@@ -164,6 +174,14 @@
     <div class="machine" data-key="legext"   style="left:88%;top:75%" data-dl="88" data-dt="75"><div class="machine-box"><span class="machine-icon">🔩</span><span class="machine-label">レッグエクステンション</span><span class="machine-part">大腿四頭筋</span></div></div>
   </div>
 </div>
+
+<footer>
+  <p>
+    <a href="privacy.html">プライバシーポリシー</a>
+    <span class="sep">|</span>
+    &copy; 2026 GYM MAP
+  </p>
+</footer>
 
 <!-- MODAL -->
 <div class="overlay" id="overlay" onclick="closeBg(event)">
