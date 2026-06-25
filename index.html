@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GYM MAP</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f0f0f; --floor: #1a1a1a; --wall: #252525;
+      --accent: #e63946; --text: #f0f0f0; --muted: #666;
+      --card: #1e1e1e; --border: #2a2a2a;
+    }
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+      user-select: none;
+    }
+    header { text-align: center; padding: 2rem 1rem 0.8rem; }
+    header h1 { font-size: 2rem; font-weight: 900; letter-spacing: 6px; color: var(--accent); }
+    header p { font-size: 0.9rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 2px; }
+    .hint { text-align: center; font-size: 0.8rem; color: var(--muted); margin: 0.6rem 0; }
+    .map-controls { display: flex; justify-content: center; margin-bottom: 0.8rem; }
+    .ctrl-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.8rem; padding: 0.4rem 1.2rem; border-radius: 4px; cursor: pointer;
+      font-family: inherit; letter-spacing: 1px; transition: all 0.15s;
+    }
+    .ctrl-btn:hover { border-color: var(--muted); color: var(--text); }
+
+    /* GYM FLOOR */
+    .gym-wrapper { padding: 0 1.5rem 3rem; display: flex; justify-content: center; }
+    .gym-floor {
+      position: relative; width: 100%; max-width: 900px; aspect-ratio: 4/3;
+      background: var(--floor); border: 2px solid var(--wall); border-radius: 8px;
+      overflow: hidden;
+    }
+    .gym-floor::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .zone {
+      position: absolute; font-size: 0.58rem; letter-spacing: 3px;
+      color: rgba(255,255,255,0.07); font-weight: 900; pointer-events: none;
+    }
+
+    /* MACHINE NODE */
+    .machine {
+      position: absolute; transform: translate(-50%,-50%);
+      cursor: grab; touch-action: none;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .machine.dragging { cursor: grabbing; z-index: 10; }
+    .machine.dragging .machine-box {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px rgba(230,57,70,0.35);
+    }
+    .machine-box {
+      background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+      padding: 8px 10px; display: flex; flex-direction: column; align-items: center;
+      gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      transition: border-color 0.15s, transform 0.1s;
+    }
+    .machine:not(.dragging):hover .machine-box {
+      border-color: rgba(230,57,70,0.6); transform: scale(1.05);
+    }
+    .machine-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
+    .machine-icon svg { width: 100%; height: 100%; }
+    .machine-label { font-size: 0.75rem; font-weight: 700; white-space: nowrap; color: var(--text); }
+    .machine-part  { font-size: 0.62rem; color: var(--accent); white-space: nowrap; }
+
+    /* MODAL */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82); z-index: 200;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      width: 100%; max-width: 660px; max-height: 90vh; overflow-y: auto;
+      animation: up 0.2s ease;
+    }
+    @keyframes up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+
+    .modal-header {
+      background: linear-gradient(135deg,rgba(230,57,70,0.2),rgba(230,57,70,0.04));
+      border-bottom: 1px solid var(--border); padding: 1.5rem;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+      position: sticky; top: 0; z-index: 1;
+    }
+    .modal-icon   { font-size: 2.4rem; display: block; margin-bottom: 0.4rem; }
+    .modal-name   { font-size: 1.5rem; font-weight: 900; }
+    .modal-target { font-size: 0.85rem; color: var(--accent); margin-top: 0.3rem; }
+    .close-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted);
+      font-size: 1.2rem; cursor: pointer; padding: 0.3rem 0.7rem; border-radius: 4px;
+      line-height: 1; flex-shrink: 0; transition: all 0.15s;
+    }
+    .close-btn:hover { color: var(--text); border-color: var(--muted); }
+
+    .modal-body {
+      padding: 1.5rem; display: grid;
+      grid-template-columns: 1fr 200px; gap: 1.5rem; align-items: start;
+    }
+    @media (max-width: 540px) { .modal-body { grid-template-columns: 1fr; } }
+
+    .section-tag { font-size: 0.7rem; letter-spacing: 3px; color: var(--accent); margin-bottom: 1rem; }
+    .steps-list { list-style: none; }
+    .steps-list li {
+      display: flex; gap: 1rem; padding: 0.8rem 0;
+      border-top: 1px solid var(--border); font-size: 1rem; line-height: 1.65; color: #d0d0d0;
+    }
+    .step-n { color: var(--accent); font-weight: 900; font-size: 0.9rem; flex-shrink: 0; min-width: 18px; padding-top: 2px; }
+    .tip-box {
+      margin-top: 1.2rem; background: rgba(230,57,70,0.08);
+      border: 1px solid rgba(230,57,70,0.22); border-radius: 4px;
+      padding: 0.9rem 1rem; font-size: 0.88rem; color: #ff9999;
+    }
+    .tip-box strong { display: block; margin-bottom: 0.3rem; font-size: 0.68rem; letter-spacing: 1px; }
+
+    /* SVG BODY */
+    .body-diagrams { display: flex; gap: 0.8rem; justify-content: center; }
+    .diagram-wrap  { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .diagram-label { font-size: 0.65rem; letter-spacing: 2px; color: var(--muted); }
+    .body-svg { width: 90px; }
+    .body-svg .bp { fill: #272727; stroke: #3e3e3e; stroke-width: 0.8; }
+    .body-svg .mr { fill: transparent; transition: fill 0.2s; }
+    .body-svg .mr.active { fill: rgba(230,57,70,0.78); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>GYM MAP</h1>
+  <p>マシンをタップしてトレーニング方法を確認</p>
+</header>
+<div class="hint">ドラッグしてマシンを自由に移動できます</div>
+<div class="map-controls">
+  <button class="ctrl-btn" onclick="resetPositions()">配置をリセット</button>
+</div>
+
+<div class="gym-wrapper">
+  <div class="gym-floor" id="gymFloor">
+    <span class="zone" style="top:3%;left:3%">FREE WEIGHT</span>
+    <span class="zone" style="top:3%;left:53%">MACHINE AREA</span>
+    <span class="zone" style="top:60%;left:53%">LEG AREA</span>
+
+    <div class="machine" data-key="bench"    style="left:10%;top:22%" data-dl="10" data-dt="22"><div class="machine-box"><span class="machine-icon">🏋️</span><span class="machine-label">ベンチプレス</span><span class="machine-part">胸・三頭筋</span></div></div>
+    <div class="machine" data-key="smith"    style="left:27%;top:22%" data-dl="27" data-dt="22"><div class="machine-box"><span class="machine-icon">📐</span><span class="machine-label">スミスマシン</span><span class="machine-part">胸・肩・脚</span></div></div>
+    <div class="machine" data-key="dumbbell" style="left:10%;top:46%" data-dl="10" data-dt="46"><div class="machine-box"><span class="machine-icon">💪</span><span class="machine-label">ダンベルエリア</span><span class="machine-part">全身</span></div></div>
+    <div class="machine" data-key="chinning" style="left:27%;top:46%" data-dl="27" data-dt="46"><div class="machine-box"><span class="machine-icon">🔝</span><span class="machine-label">懸垂バー</span><span class="machine-part">広背筋・二頭筋</span></div></div>
+    <div class="machine" data-key="lat"      style="left:57%;top:22%" data-dl="57" data-dt="22"><div class="machine-box"><span class="machine-icon">⬇️</span><span class="machine-label">ラットプルダウン</span><span class="machine-part">広背筋</span></div></div>
+    <div class="machine" data-key="cable"    style="left:73%;top:22%" data-dl="73" data-dt="22"><div class="machine-box"><span class="machine-icon">🔄</span><span class="machine-label">ケーブルマシン</span><span class="machine-part">全身（汎用）</span></div></div>
+    <div class="machine" data-key="shoulder" style="left:88%;top:22%" data-dl="88" data-dt="22"><div class="machine-box"><span class="machine-icon">⬆️</span><span class="machine-label">ショルダープレス</span><span class="machine-part">三角筋</span></div></div>
+    <div class="machine" data-key="chestfly" style="left:57%;top:46%" data-dl="57" data-dt="46"><div class="machine-box"><span class="machine-icon">🦅</span><span class="machine-label">チェストフライ</span><span class="machine-part">大胸筋</span></div></div>
+    <div class="machine" data-key="row"      style="left:73%;top:46%" data-dl="73" data-dt="46"><div class="machine-box"><span class="machine-icon">🚣</span><span class="machine-label">ロウマシン</span><span class="machine-part">広背筋・僧帽筋</span></div></div>
+    <div class="machine" data-key="legpress" style="left:57%;top:75%" data-dl="57" data-dt="75"><div class="machine-box"><span class="machine-icon">🦵</span><span class="machine-label">レッグプレス</span><span class="machine-part">大腿四頭筋・臀筋</span></div></div>
+    <div class="machine" data-key="legcurl"  style="left:73%;top:75%" data-dl="73" data-dt="75"><div class="machine-box"><span class="machine-icon">🦿</span><span class="machine-label">レッグカール</span><span class="machine-part">ハムストリングス</span></div></div>
+    <div class="machine" data-key="legext"   style="left:88%;top:75%" data-dl="88" data-dt="75"><div class="machine-box"><span class="machine-icon">🔩</span><span class="machine-label">レッグエクステンション</span><span class="machine-part">大腿四頭筋</span></div></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <span class="modal-icon" id="m-icon"></span>
+        <div class="modal-name" id="m-name"></div>
+        <div class="modal-target" id="m-target"></div>
+      </div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Steps -->
+      <div>
+        <div class="section-tag">HOW TO USE</div>
+        <ol class="steps-list" id="m-steps"></ol>
+        <div class="tip-box" id="m-tip">
+          <strong>POINT</strong>
+          <span id="m-tip-text"></span>
+        </div>
+      </div>
+
+      <!-- Body diagrams -->
+      <div class="body-diagrams">
+        <!-- FRONT -->
+        <div class="diagram-wrap">
+          <span class="diagram-label">FRONT</span>
+          <svg class="body-svg" viewBox="0 0 100 250" xmlns="http://www.w3.org/2000/svg">
+            <!-- body base -->
+            <ellipse class="bp" cx="50" cy="16" rx="13" ry="14.5"/>
+            <rect   class="bp" x="45.5" y="29" width="9" height="9" rx="2"/>
+            <ellipse class="bp" cx="25" cy="47" rx="11" ry="9.5"/>
+            <ellipse class="bp" cx="75" cy="47" rx="11" ry="9.5"/>
+            <path   class="bp" d="M33,41 L67,41 Q73,58 71,92 Q70,112 50,115 Q30,112 29,92 Q27,58 33,41Z"/>
+            <ellipse class="bp" cx="16" cy="74" rx="7"   ry="20"  transform="rotate(-6,16,74)"/>
+            <ellipse class="bp" cx="84" cy="74" rx="7"   ry="20"  transform="rotate(6,84,74)"/>
+            <ellipse class="bp" cx="12" cy="112" rx="5.5" ry="16" transform="rotate(-4,12,112)"/>
+            <ellipse class="bp" cx="88" cy="112" rx="5.5" ry="16" transform="rotate(4,88,112)"/>
+            <path   class="bp" d="M30,110 Q28,128 32,138 L38,143 L62,143 L68,138 Q72,128 70,110Z"/>
+            <ellipse class="bp" cx="37" cy="168" rx="13" ry="25"/>
+            <ellipse class="bp" cx="63" cy="168" rx="13" ry="25"/>
+            <ellipse class="bp" cx="35" cy="213" rx="9"  ry="19"/>
+            <ellipse class="bp" cx="65" cy="213" rx="9"  ry="19"/>
+            <ellipse class="bp" cx="34" cy="234" rx="11" ry="5"/>
+            <ellipse class="bp" cx="66" cy="234" rx="11" ry="5"/>
+            <!-- muscle regions (front) -->
+            <ellipse class="mr m-chest"    cx="41" cy="63" rx="10" ry="9"/>
+            <ellipse class="mr m-chest"    cx="59" cy="63" rx="10" ry="9"/>
+            <ellipse class="mr m-shoulder" cx="24" cy="47" rx="9.5" ry="8.5"/>
+            <ellipse class="mr m-shoulder" cx="76" cy="47" rx="9.5" ry="8.5"/>
+            <ellipse class="mr m-bicep"    cx="15" cy="70" rx="5"   ry="12"  transform="rotate(-6,15,70)"/>
+            <ellipse class="mr m-bicep"    cx="85" cy="70" rx="5"   ry="12"  transform="rotate(6,85,70)"/>
+            <ellipse class="mr m-tricep"   cx="17" cy="78" rx="4.5" ry="13"  transform="rotate(-6,17,78)"/>
+            <ellipse class="mr m-tricep"   cx="83" cy="78" rx="4.5" ry="13"  transform="rotate(6,83,78)"/>
+            <rect    class="mr m-abs"      x="42"  y="83"  width="16" height="28" rx="4"/>
+            <ellipse class="mr m-quad"     cx="37" cy="166" rx="11" ry="22"/>
+            <ellipse class="mr m-quad"     cx="63" cy="166" rx="11" ry="22"/>
+            <ellipse class="mr m-glute-f"  cx="37" cy="148" rx="10" ry="9"/>
+            <ellipse class="mr m-glute-f"  cx="63" cy="148" rx="10" ry="9"/>
+            <ellipse class="mr m-calf"     cx="35" cy="210" rx="7.5" ry="16"/>
+            <ellipse class="mr m-calf"     cx="65" cy="210" rx="7.5" ry="16"/>
+          </svg>
+        </div>
+        <!-- BACK -->
+        <div class="diagram-wrap">
+          <span class="diagram-label">BACK</span>
+          <svg class="body-svg" viewBox="0 0 100 250" xmlns="http://www.w3.org/2000/svg">
+            <!-- body base (same shapes) -->
+            <ellipse class="bp" cx="50" cy="16" rx="13" ry="14.5"/>
+            <rect   class="bp" x="45.5" y="29" width="9" height="9" rx="2"/>
+            <ellipse class="bp" cx="25" cy="47" rx="11" ry="9.5"/>
+            <ellipse class="bp" cx="75" cy="47" rx="11" ry="9.5"/>
+            <path   class="bp" d="M33,41 L67,41 Q73,58 71,92 Q70,112 50,115 Q30,112 29,92 Q27,58 33,41Z"/>
+            <ellipse class="bp" cx="16" cy="74" rx="7"   ry="20"  transform="rotate(-6,16,74)"/>
+            <ellipse class="bp" cx="84" cy="74" rx="7"   ry="20"  transform="rotate(6,84,74)"/>
+            <ellipse class="bp" cx="12" cy="112" rx="5.5" ry="16" transform="rotate(-4,12,112)"/>
+            <ellipse class="bp" cx="88" cy="112" rx="5.5" ry="16" transform="rotate(4,88,112)"/>
+            <path   class="bp" d="M30,110 Q28,128 32,138 L38,143 L62,143 L68,138 Q72,128 70,110Z"/>
+            <ellipse class="bp" cx="37" cy="168" rx="13" ry="25"/>
+            <ellipse class="bp" cx="63" cy="168" rx="13" ry="25"/>
+            <ellipse class="bp" cx="35" cy="213" rx="9"  ry="19"/>
+            <ellipse class="bp" cx="65" cy="213" rx="9"  ry="19"/>
+            <ellipse class="bp" cx="34" cy="234" rx="11" ry="5"/>
+            <ellipse class="bp" cx="66" cy="234" rx="11" ry="5"/>
+            <!-- muscle regions (back) -->
+            <path    class="mr m-trap"       d="M36,35 Q50,52 64,35 Q74,43 70,64 Q60,74 50,76 Q40,74 30,64 Q26,43 36,35Z"/>
+            <path    class="mr m-lat"        d="M28,50 Q19,72 21,100 Q27,112 36,110 Q40,90 40,70 Q34,60 28,50Z"/>
+            <path    class="mr m-lat"        d="M72,50 Q81,72 79,100 Q73,112 64,110 Q60,90 60,70 Q66,60 72,50Z"/>
+            <rect    class="mr m-lower-back" x="42" y="92" width="16" height="20" rx="3"/>
+            <ellipse class="mr m-glute"      cx="38" cy="147" rx="11" ry="10"/>
+            <ellipse class="mr m-glute"      cx="62" cy="147" rx="11" ry="10"/>
+            <ellipse class="mr m-hamstring"  cx="37" cy="168" rx="11" ry="22"/>
+            <ellipse class="mr m-hamstring"  cx="63" cy="168" rx="11" ry="22"/>
+            <ellipse class="mr m-tricep-b"   cx="15.5" cy="76" rx="6"  ry="18" transform="rotate(-6,15.5,76)"/>
+            <ellipse class="mr m-tricep-b"   cx="84.5" cy="76" rx="6"  ry="18" transform="rotate(6,84.5,76)"/>
+            <ellipse class="mr m-calf-b"     cx="35" cy="212" rx="8"  ry="18"/>
+            <ellipse class="mr m-calf-b"     cx="65" cy="212" rx="8"  ry="18"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  bench:    { icon:'🏋️', name:'ベンチプレス',         target:'大胸筋・三角筋前部・上腕三頭筋',
+    muscles:['m-chest','m-shoulder','m-tricep','m-tricep-b'],
+    steps:['肩甲骨を内側に寄せ、背中にアーチを作って寝る','バーを乳首ライン（胸下部）の真上に持つ。グリップ幅は手首が肘の真上になる幅','バーをゆっくり胸に向けて降ろす（バウンドさせない）','大胸筋を意識しながら押し上げ、肘を伸ばしきる手前で止める'],
+    tip:'腰がベンチから浮かないよう注意。必ずセーフティーバーを設定する。' },
+  smith:    { icon:'📐', name:'スミスマシン',           target:'胸・肩・脚（種目による）',
+    muscles:['m-chest','m-shoulder','m-tricep','m-tricep-b'],
+    steps:['バーの高さをセット。ベンチプレスなら胸上、スクワットなら肩甲骨上部','セーフティーフックの解除方法を確認してから持つ','ベンチプレスは肩甲骨を固め、スクワットは足を肩幅に広げて構える','動作中はバーをレールに沿わせてコントロールして動かす'],
+    tip:'バーが固定されているため安全に高重量を扱える。' },
+  dumbbell: { icon:'💪', name:'ダンベルエリア',         target:'全身（種目による）',
+    muscles:['m-chest','m-bicep','m-shoulder','m-tricep','m-tricep-b'],
+    steps:['目的の重量のダンベルを選ぶ。初心者は軽めから','ダンベルカール：肘を固定し、二頭筋でゆっくり持ち上げる','ダンベルフライ：腕を弧を描くように開閉し大胸筋を伸縮させる','使い終わったらラックの元の位置に戻す'],
+    tip:'バーベルより可動域が広く取れる。左右差が出やすいので均等に鍛えよう。' },
+  chinning: { icon:'🔝', name:'懸垂バー（チンニング）', target:'広背筋・上腕二頭筋・僧帽筋',
+    muscles:['m-bicep','m-lat','m-trap'],
+    steps:['バーを肩幅より広めに順手（手の甲が上）で握る','肩甲骨を下に引き下げてからバーに向かって体を引き上げる','顎がバーの高さに達したらゆっくり下ろす','完全に肘が伸びるまで下ろして可動域を最大限使う'],
+    tip:'反動は使わない。できない場合はラットプルダウンから始める。' },
+  lat:      { icon:'⬇️', name:'ラットプルダウン',       target:'広背筋・上腕二頭筋',
+    muscles:['m-bicep','m-lat'],
+    steps:['太ももがパッドにしっかり当たる高さに調整して座る','バーを肩幅より広めに順手で握り、わずかに後傾する','肘を脇腹に引き寄せるイメージでバーを鎖骨あたりまで引き下げる','広背筋の収縮を感じながらゆっくり元に戻す'],
+    tip:'腕で引かず、肘を下に落とす感覚で広背筋を使う。' },
+  cable:    { icon:'🔄', name:'ケーブルマシン',         target:'全身（汎用）',
+    muscles:['m-chest','m-lat','m-bicep','m-tricep','m-tricep-b'],
+    steps:['種目に合わせてアタッチメント（バー・ロープ・ハンドル）を付ける','プーリーの高さを種目に合わせて調整する','動作全体で常にテンションがかかるようコントロールする','反動を使わず、ターゲット筋肉で引くことを意識する'],
+    tip:'動作全体でテンションが維持されるため、筋肉への刺激が高い。' },
+  shoulder: { icon:'⬆️', name:'ショルダープレス',       target:'三角筋・上腕三頭筋',
+    muscles:['m-shoulder','m-tricep','m-tricep-b','m-trap'],
+    steps:['グリップが肩の高さになるようシートを調整する','背中をパッドにつけ、グリップを順手で握る','肘が伸びきる手前まで押し上げる','ゆっくりスタートポジションに戻す'],
+    tip:'バーベルプレスより肩関節への負担が少ない。肩をすくめないよう注意。' },
+  chestfly: { icon:'🦅', name:'チェストフライ',         target:'大胸筋',
+    muscles:['m-chest'],
+    steps:['ハンドルが胸の高さになるようシートを調整して座る','背中をパッドに密着させ、胸を張った姿勢を保つ','肘を軽く曲げたまま、弧を描くように腕を閉じていく','胸の中心でしっかり収縮させてからゆっくり戻す'],
+    tip:'プレス系の後に行うと大胸筋をより深く追い込める仕上げ種目。' },
+  row:      { icon:'🚣', name:'シーテッドロウ',         target:'広背筋・僧帽筋・菱形筋',
+    muscles:['m-lat','m-trap','m-lower-back'],
+    steps:['胸パッドに胸が当たる高さにシートを調整して座る','グリップを持ち、背すじを伸ばして構える','肘を後ろに引くイメージでハンドルを腹部に向けて引く','肩甲骨を寄せて収縮させてから、腕を伸ばしながら戻す'],
+    tip:'背中が丸まらないよう注意。引く時に肩が上がらないようにする。' },
+  legpress: { icon:'🦵', name:'レッグプレス',           target:'大腿四頭筋・臀筋・ハムストリングス',
+    muscles:['m-quad','m-glute-f','m-glute','m-hamstring'],
+    steps:['背中全体がシートに密着するよう座り、足を肩幅でプレートに置く','セーフティーバーを解除し、膝を約90度に曲げて構える','膝を伸ばしきらない（ロックアウトしない）ようプレートを押す','ゆっくりコントロールしながら膝90度まで戻す'],
+    tip:'腰をシートから浮かせない。足の位置を上にするほど臀部・ハム寄りになる。' },
+  legcurl:  { icon:'🦿', name:'レッグカール',           target:'ハムストリングス',
+    muscles:['m-hamstring'],
+    steps:['かかとがパッドの上になるようポジションを合わせる','太ももをパッドに固定し、腰が浮かないよう構える','かかとを臀部に近づけるようにゆっくり曲げる','ハムストリングスの収縮を感じてからゆっくり戻す'],
+    tip:'大腿四頭筋との筋力バランスを保つために重要。' },
+  legext:   { icon:'🔩', name:'レッグエクステンション', target:'大腿四頭筋',
+    muscles:['m-quad'],
+    steps:['膝の関節がシートの端（回転軸）に合うよう調整する','パッドがくるぶしの少し上に来るよう高さを合わせる','膝を完全に伸ばすまでパッドを蹴り上げる','大腿四頭筋の収縮を感じながらゆっくり戻す'],
+    tip:'膝の怪我がある人は高重量を避ける。' },
+};
+
+// ===== DRAG =====
+const gymFloor = document.getElementById('gymFloor');
+let dragEl = null, dsx, dsy, dsl, dst, moved;
+
+document.querySelectorAll('.machine').forEach(el => {
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    dragEl = el; dsx = e.clientX; dsy = e.clientY;
+    dsl = parseFloat(el.style.left); dst = parseFloat(el.style.top);
+    moved = false;
+    el.setPointerCapture(e.pointerId);
+    el.classList.add('dragging');
+  });
+  el.addEventListener('pointermove', e => {
+    if (dragEl !== el) return;
+    const r = gymFloor.getBoundingClientRect();
+    if (Math.abs(e.clientX - dsx) > 5 || Math.abs(e.clientY - dsy) > 5) moved = true;
+    if (moved) {
+      el.style.left = Math.max(6, Math.min(94, dsl + (e.clientX - dsx) / r.width  * 100)) + '%';
+      el.style.top  = Math.max(6, Math.min(94, dst + (e.clientY - dsy) / r.height * 100)) + '%';
+    }
+  });
+  el.addEventListener('pointerup', () => {
+    if (dragEl !== el) return;
+    el.classList.remove('dragging');
+    dragEl = null;
+    if (!moved) openModal(el.dataset.key);
+    else savePos();
+    moved = false;
+  });
+});
+
+function savePos() {
+  const p = {};
+  document.querySelectorAll('.machine').forEach(el => {
+    p[el.dataset.key] = { l: el.style.left, t: el.style.top };
+  });
+  localStorage.setItem('gymPos', JSON.stringify(p));
+}
+function loadPos() {
+  try {
+    const p = JSON.parse(localStorage.getItem('gymPos') || '{}');
+    Object.entries(p).forEach(([k, v]) => {
+      const el = document.querySelector(`.machine[data-key="${k}"]`);
+      if (el) { el.style.left = v.l; el.style.top = v.t; }
+    });
+  } catch(e) {}
+}
+function resetPositions() {
+  document.querySelectorAll('.machine').forEach(el => {
+    el.style.left = el.dataset.dl + '%';
+    el.style.top  = el.dataset.dt + '%';
+  });
+  localStorage.removeItem('gymPos');
+}
+
+// ===== MODAL =====
+function openModal(key) {
+  const d = DATA[key];
+  document.getElementById('m-icon').textContent   = d.icon;
+  document.getElementById('m-name').textContent   = d.name;
+  document.getElementById('m-target').textContent = d.target;
+  document.getElementById('m-steps').innerHTML    = d.steps.map((s, i) =>
+    `<li><span class="step-n">${i+1}</span><span>${s}</span></li>`).join('');
+  document.getElementById('m-tip-text').textContent = d.tip;
+  // muscles
+  document.querySelectorAll('.mr').forEach(el => el.classList.remove('active'));
+  d.muscles.forEach(m => document.querySelectorAll('.' + m).forEach(el => el.classList.add('active')));
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function closeBg(e)   { if (e.target.id === 'overlay') closeModal(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+loadPos();
+</script>
+</body>
+</html>
