@@ -17,13 +17,13 @@
       user-select: none;
     }
     header { text-align: center; padding: 2rem 1rem 0.8rem; }
-    header h1 { font-size: 2rem; font-weight: 900; letter-spacing: 6px; color: var(--accent); }
-    header p { font-size: 0.9rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 2px; }
-    .hint { text-align: center; font-size: 0.8rem; color: var(--muted); margin: 0.6rem 0; }
+    header h1 { font-size: 2.4rem; font-weight: 900; letter-spacing: 6px; color: var(--accent); }
+    header p { font-size: 1.05rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 2px; }
+    .hint { text-align: center; font-size: 0.95rem; color: var(--muted); margin: 0.6rem 0; }
     .map-controls { display: flex; justify-content: center; margin-bottom: 0.8rem; }
     .ctrl-btn {
       background: transparent; border: 1px solid var(--border); color: var(--muted);
-      font-size: 0.8rem; padding: 0.4rem 1.2rem; border-radius: 4px; cursor: pointer;
+      font-size: 0.95rem; padding: 0.5rem 1.4rem; border-radius: 4px; cursor: pointer;
       font-family: inherit; letter-spacing: 1px; transition: all 0.15s;
     }
     .ctrl-btn:hover { border-color: var(--muted); color: var(--text); }
@@ -67,10 +67,10 @@
     .machine:not(.dragging):hover .machine-box {
       border-color: rgba(230,57,70,0.6); transform: scale(1.05);
     }
-    .machine-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
+    .machine-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
     .machine-icon svg { width: 100%; height: 100%; }
-    .machine-label { font-size: 0.75rem; font-weight: 700; white-space: nowrap; color: var(--text); }
-    .machine-part  { font-size: 0.62rem; color: var(--accent); white-space: nowrap; }
+    .machine-label { font-size: 0.9rem; font-weight: 700; white-space: nowrap; color: var(--text); }
+    .machine-part  { font-size: 0.75rem; color: var(--accent); white-space: nowrap; }
 
     /* MODAL */
     .overlay {
@@ -94,8 +94,8 @@
     }
     .modal-icon   { width: 56px; height: 56px; display: block; margin-bottom: 0.4rem; }
     .modal-icon svg { width: 100%; height: 100%; }
-    .modal-name   { font-size: 1.5rem; font-weight: 900; }
-    .modal-target { font-size: 0.85rem; color: var(--accent); margin-top: 0.3rem; }
+    .modal-name   { font-size: 1.8rem; font-weight: 900; }
+    .modal-target { font-size: 1rem; color: var(--accent); margin-top: 0.3rem; }
     .close-btn {
       background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted);
       font-size: 1.2rem; cursor: pointer; padding: 0.3rem 0.7rem; border-radius: 4px;
@@ -109,19 +109,19 @@
     }
     @media (max-width: 540px) { .modal-body { grid-template-columns: 1fr; } }
 
-    .section-tag { font-size: 0.7rem; letter-spacing: 3px; color: var(--accent); margin-bottom: 1rem; }
+    .section-tag { font-size: 0.85rem; letter-spacing: 3px; color: var(--accent); margin-bottom: 1rem; }
     .steps-list { list-style: none; }
     .steps-list li {
-      display: flex; gap: 1rem; padding: 0.8rem 0;
-      border-top: 1px solid var(--border); font-size: 1rem; line-height: 1.65; color: #d0d0d0;
+      display: flex; gap: 1rem; padding: 0.9rem 0;
+      border-top: 1px solid var(--border); font-size: 1.1rem; line-height: 1.75; color: #d0d0d0;
     }
-    .step-n { color: var(--accent); font-weight: 900; font-size: 0.9rem; flex-shrink: 0; min-width: 18px; padding-top: 2px; }
+    .step-n { color: var(--accent); font-weight: 900; font-size: 1rem; flex-shrink: 0; min-width: 20px; padding-top: 2px; }
     .tip-box {
       margin-top: 1.2rem; background: rgba(230,57,70,0.08);
       border: 1px solid rgba(230,57,70,0.22); border-radius: 4px;
-      padding: 0.9rem 1rem; font-size: 0.88rem; color: #ff9999;
+      padding: 0.9rem 1rem; font-size: 1rem; color: #ff9999;
     }
-    .tip-box strong { display: block; margin-bottom: 0.3rem; font-size: 0.68rem; letter-spacing: 1px; }
+    .tip-box strong { display: block; margin-bottom: 0.3rem; font-size: 0.8rem; letter-spacing: 1px; }
 
     /* SVG BODY */
     .body-diagrams { display: flex; gap: 0.8rem; justify-content: center; }
