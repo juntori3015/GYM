@@ -92,7 +92,8 @@
       display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
       position: sticky; top: 0; z-index: 1;
     }
-    .modal-icon   { font-size: 2.4rem; display: block; margin-bottom: 0.4rem; }
+    .modal-icon   { width: 56px; height: 56px; display: block; margin-bottom: 0.4rem; }
+    .modal-icon svg { width: 100%; height: 100%; }
     .modal-name   { font-size: 1.5rem; font-weight: 900; }
     .modal-target { font-size: 0.85rem; color: var(--accent); margin-top: 0.3rem; }
     .close-btn {
@@ -269,6 +270,21 @@
 </div>
 
 <script>
+const ICONS = {
+  bench:    `<svg viewBox="0 0 40 34" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="14" width="34" height="4" rx="2" fill="#aaa"/><ellipse cx="5" cy="16" rx="4" ry="6" fill="#e63946"/><ellipse cx="35" cy="16" rx="4" ry="6" fill="#e63946"/><rect x="9" y="20" width="22" height="5" rx="2" fill="#666"/><rect x="11" y="25" width="3" height="7" rx="1" fill="#555"/><rect x="26" y="25" width="3" height="7" rx="1" fill="#555"/></svg>`,
+  smith:    `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="2" width="4" height="36" rx="2" fill="#666"/><rect x="31" y="2" width="4" height="36" rx="2" fill="#666"/><rect x="5" y="2" width="30" height="4" rx="2" fill="#555"/><rect x="9" y="18" width="22" height="4" rx="2" fill="#aaa"/><rect x="7" y="15" width="5" height="10" rx="1" fill="#e63946"/><rect x="28" y="15" width="5" height="10" rx="1" fill="#e63946"/></svg>`,
+  dumbbell: `<svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg"><rect x="13" y="9" width="14" height="6" rx="3" fill="#aaa"/><rect x="3" y="4" width="10" height="16" rx="3" fill="#e63946"/><rect x="27" y="4" width="10" height="16" rx="3" fill="#e63946"/></svg>`,
+  chinning: `<svg viewBox="0 0 40 36" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="4" height="28" rx="2" fill="#555"/><rect x="31" y="5" width="4" height="28" rx="2" fill="#555"/><rect x="2" y="6" width="36" height="5" rx="2.5" fill="#aaa"/><rect x="14" y="7" width="4" height="4" rx="1" fill="#e63946"/><rect x="22" y="7" width="4" height="4" rx="1" fill="#e63946"/></svg>`,
+  lat:      `<svg viewBox="0 0 42 44" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="2" width="32" height="5" rx="2" fill="#555"/><rect x="18" y="2" width="4" height="34" rx="2" fill="#666"/><rect x="32" y="7" width="8" height="24" rx="2" fill="#555"/><rect x="33" y="9" width="6" height="4" rx="1" fill="#e63946"/><rect x="33" y="15" width="6" height="3" rx="1" fill="#444"/><rect x="33" y="20" width="6" height="3" rx="1" fill="#444"/><rect x="8" y="32" width="24" height="4" rx="2" fill="#aaa"/><rect x="10" y="36" width="20" height="6" rx="2" fill="#555"/></svg>`,
+  cable:    `<svg viewBox="0 0 42 44" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="2" width="5" height="40" rx="2" fill="#555"/><rect x="34" y="2" width="5" height="40" rx="2" fill="#555"/><rect x="3" y="2" width="36" height="5" rx="2" fill="#555"/><rect x="3" y="37" width="36" height="5" rx="2" fill="#555"/><rect x="4" y="7" width="6" height="22" rx="1" fill="#444"/><rect x="4.5" y="8" width="5" height="4" rx="1" fill="#e63946"/><rect x="32" y="7" width="6" height="22" rx="1" fill="#444"/><rect x="32.5" y="8" width="5" height="4" rx="1" fill="#e63946"/><line x1="21" y1="7" x2="21" y2="32" stroke="#888" stroke-width="1.5"/><rect x="16" y="31" width="10" height="4" rx="2" fill="#e63946"/></svg>`,
+  shoulder: `<svg viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="26" width="14" height="6" rx="3" fill="#555"/><rect x="14" y="13" width="5" height="15" rx="2" fill="#555"/><rect x="5" y="8" width="4" height="22" rx="2" fill="#666"/><rect x="33" y="8" width="4" height="22" rx="2" fill="#666"/><rect x="4" y="6" width="12" height="5" rx="2" fill="#e63946"/><rect x="26" y="6" width="12" height="5" rx="2" fill="#e63946"/><rect x="17" y="32" width="3" height="8" rx="1" fill="#444"/><rect x="22" y="32" width="3" height="8" rx="1" fill="#444"/></svg>`,
+  chestfly: `<svg viewBox="0 0 46 42" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="4" width="6" height="34" rx="3" fill="#555"/><rect x="13" y="26" width="20" height="6" rx="3" fill="#555"/><path d="M20 15 Q7 15 5 26" stroke="#666" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M26 15 Q39 15 41 26" stroke="#666" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="5" cy="26" r="5" fill="#e63946"/><circle cx="41" cy="26" r="5" fill="#e63946"/></svg>`,
+  row:      `<svg viewBox="0 0 46 38" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="30" width="40" height="5" rx="2" fill="#555"/><rect x="18" y="23" width="16" height="7" rx="3" fill="#555"/><rect x="3" y="14" width="5" height="20" rx="2" fill="#555"/><rect x="2" y="15" width="7" height="14" rx="2" fill="#666"/><line x1="9" y1="22" x2="28" y2="24" stroke="#aaa" stroke-width="2"/><rect x="26" y="21" width="9" height="6" rx="2" fill="#e63946"/><rect x="9" y="25" width="7" height="5" rx="1" fill="#444"/><rect x="19" y="25" width="7" height="5" rx="1" fill="#444"/></svg>`,
+  legpress: `<svg viewBox="0 0 46 42" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="40" x2="36" y2="6" stroke="#555" stroke-width="5" stroke-linecap="round"/><line x1="14" y1="40" x2="42" y2="10" stroke="#555" stroke-width="4" stroke-linecap="round"/><rect x="32" y="2" width="12" height="9" rx="2" fill="#e63946" transform="rotate(-32 38 6)"/><rect x="3" y="30" width="14" height="8" rx="2" fill="#666"/><rect x="2" y="17" width="6" height="15" rx="2" fill="#555"/><rect x="2" y="10" width="6" height="9" rx="1" fill="#e63946"/></svg>`,
+  legcurl:  `<svg viewBox="0 0 46 38" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="6" width="36" height="12" rx="3" fill="#666"/><rect x="4" y="16" width="36" height="8" rx="3" fill="#555"/><rect x="6" y="24" width="4" height="12" rx="2" fill="#444"/><rect x="36" y="24" width="4" height="12" rx="2" fill="#444"/><rect x="21" y="20" width="4" height="9" rx="2" fill="#777"/><path d="M17 29 Q23 38 31 29" stroke="#e63946" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+  legext:   `<svg viewBox="0 0 46 38" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="14" width="24" height="8" rx="3" fill="#555"/><rect x="32" y="6" width="6" height="10" rx="3" fill="#555"/><rect x="18" y="22" width="4" height="14" rx="2" fill="#444"/><rect x="30" y="22" width="4" height="14" rx="2" fill="#444"/><rect x="16" y="21" width="4" height="13" rx="2" fill="#777"/><rect x="3" y="32" width="17" height="5" rx="2" fill="#e63946"/></svg>`,
+};
+
 const DATA = {
   bench:    { icon:'🏋️', name:'ベンチプレス',         target:'大胸筋・三角筋前部・上腕三頭筋',
     muscles:['m-chest','m-shoulder','m-tricep','m-tricep-b'],
@@ -379,7 +395,7 @@ function resetPositions() {
 // ===== MODAL =====
 function openModal(key) {
   const d = DATA[key];
-  document.getElementById('m-icon').textContent   = d.icon;
+  document.getElementById('m-icon').innerHTML   = ICONS[key] || d.icon;
   document.getElementById('m-name').textContent   = d.name;
   document.getElementById('m-target').textContent = d.target;
   document.getElementById('m-steps').innerHTML    = d.steps.map((s, i) =>
@@ -395,6 +411,10 @@ function closeBg(e)   { if (e.target.id === 'overlay') closeModal(); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 loadPos();
+document.querySelectorAll('.machine').forEach(el => {
+  const ic = el.querySelector('.machine-icon');
+  if (ic && ICONS[el.dataset.key]) ic.innerHTML = ICONS[el.dataset.key];
+});
 </script>
 </body>
 </html>
