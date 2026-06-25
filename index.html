@@ -88,7 +88,7 @@
     @keyframes up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
 
     .modal-header {
-      background: linear-gradient(135deg,rgba(230,57,70,0.2),rgba(230,57,70,0.04));
+      background: linear-gradient(135deg,rgba(230,57,70,0.2),rgba(230,57,70,0.04)), var(--card);
       border-bottom: 1px solid var(--border); padding: 1.5rem;
       display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
       position: sticky; top: 0; z-index: 1;
@@ -104,48 +104,80 @@
     }
     .close-btn:hover { color: var(--text); border-color: var(--muted); }
 
-    .modal-body {
-      padding: 1.5rem; display: grid;
-      grid-template-columns: 1fr 200px; gap: 1.5rem; align-items: start;
+    .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; }
+
+    /* PRIMARY: menu registration */
+    .menu-primary {
+      display: flex; gap: 1.2rem; align-items: flex-start;
     }
-    @media (max-width: 540px) { .modal-body { grid-template-columns: 1fr; } }
+    .menu-primary-controls { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+    .set-rep-row {
+      display: flex; gap: 1rem; align-items: center;
+    }
+    .set-rep-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
+    .set-rep-group label {
+      font-size: 0.75rem; letter-spacing: 3px; color: var(--accent); font-weight: 700;
+    }
+    .set-rep-group input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); font-size: 1.8rem; font-weight: 900; font-family: inherit;
+      padding: 0.6rem 0.8rem; border-radius: 6px; text-align: center;
+      transition: border-color 0.15s;
+    }
+    .set-rep-group input:focus { outline: none; border-color: var(--accent); }
+    .set-rep-x { font-size: 1.4rem; color: var(--muted); padding-top: 1.6rem; flex-shrink: 0; }
+
+    /* ADD TO MENU BUTTON */
+    .add-menu-btn {
+      width: 100%; background: var(--accent); border: none; color: #fff;
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 2px;
+      padding: 1rem; border-radius: 6px; cursor: pointer;
+      font-family: inherit; transition: opacity 0.15s;
+    }
+    .add-menu-btn:hover { opacity: 0.85; }
+    .add-menu-btn.added {
+      background: transparent; border: 1px solid var(--accent); color: var(--accent);
+    }
+
+    /* SVG BODY */
+    .body-diagrams { display: flex; gap: 0.8rem; justify-content: center; flex-shrink: 0; }
+    .diagram-wrap  { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .diagram-label { font-size: 0.65rem; letter-spacing: 2px; color: var(--muted); }
+    .body-svg { width: 80px; }
+    .body-svg .bp { fill: #272727; stroke: #3e3e3e; stroke-width: 0.8; }
+    .body-svg .mr { fill: transparent; transition: fill 0.2s; }
+    .body-svg .mr.active { fill: rgba(230,57,70,0.78); }
+
+    /* SECONDARY: how to use (collapsible) */
+    .howto-toggle {
+      width: 100%; background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.9rem; font-family: inherit;
+      padding: 0.7rem 1rem; border-radius: 6px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      letter-spacing: 2px; transition: all 0.15s;
+    }
+    .howto-toggle:hover { border-color: var(--muted); color: var(--text); }
+    .howto-toggle .toggle-arrow { transition: transform 0.2s; font-style: normal; }
+    .howto-toggle.open .toggle-arrow { transform: rotate(180deg); }
+
+    .howto-content {
+      display: none; padding-top: 0.4rem;
+    }
+    .howto-content.open { display: block; }
 
     .section-tag { font-size: 0.85rem; letter-spacing: 3px; color: var(--accent); margin-bottom: 1rem; }
     .steps-list { list-style: none; }
     .steps-list li {
       display: flex; gap: 1rem; padding: 0.9rem 0;
-      border-top: 1px solid var(--border); font-size: 1.1rem; line-height: 1.75; color: #d0d0d0;
+      border-top: 1px solid var(--border); font-size: 1rem; line-height: 1.75; color: #d0d0d0;
     }
     .step-n { color: var(--accent); font-weight: 900; font-size: 1rem; flex-shrink: 0; min-width: 20px; padding-top: 2px; }
     .tip-box {
-      margin-top: 1.2rem; background: rgba(230,57,70,0.08);
+      margin-top: 1rem; background: rgba(230,57,70,0.08);
       border: 1px solid rgba(230,57,70,0.22); border-radius: 4px;
-      padding: 0.9rem 1rem; font-size: 1rem; color: #ff9999;
+      padding: 0.9rem 1rem; font-size: 0.95rem; color: #ff9999;
     }
     .tip-box strong { display: block; margin-bottom: 0.3rem; font-size: 0.8rem; letter-spacing: 1px; }
-
-    /* SVG BODY */
-    .body-diagrams { display: flex; gap: 0.8rem; justify-content: center; }
-    .diagram-wrap  { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
-    .diagram-label { font-size: 0.65rem; letter-spacing: 2px; color: var(--muted); }
-    .body-svg { width: 90px; }
-    .body-svg .bp { fill: #272727; stroke: #3e3e3e; stroke-width: 0.8; }
-    .body-svg .mr { fill: transparent; transition: fill 0.2s; }
-    .body-svg .mr.active { fill: rgba(230,57,70,0.78); }
-
-    /* ADD TO MENU BUTTON */
-    .add-menu-btn {
-      margin-top: 1.2rem; width: 100%;
-      background: var(--accent); border: none; color: #fff;
-      font-size: 1rem; font-weight: 700; letter-spacing: 2px;
-      padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer;
-      font-family: inherit; transition: opacity 0.15s;
-    }
-    .add-menu-btn:hover { opacity: 0.85; }
-    .add-menu-btn.added {
-      background: transparent; border: 1px solid var(--accent);
-      color: var(--accent);
-    }
 
     /* MENU FAB */
     .menu-fab {
@@ -295,19 +327,24 @@
       <button class="close-btn" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <!-- Steps -->
-      <div>
-        <div class="section-tag">HOW TO USE</div>
-        <ol class="steps-list" id="m-steps"></ol>
-        <div class="tip-box" id="m-tip">
-          <strong>POINT</strong>
-          <span id="m-tip-text"></span>
+      <!-- PRIMARY: menu registration -->
+      <div class="menu-primary">
+        <div class="menu-primary-controls">
+          <div class="set-rep-row">
+            <div class="set-rep-group">
+              <label>SETS</label>
+              <input type="number" id="m-sets" min="1" max="20" value="3">
+            </div>
+            <span class="set-rep-x">×</span>
+            <div class="set-rep-group">
+              <label>REPS</label>
+              <input type="number" id="m-reps" min="1" max="100" value="10">
+            </div>
+          </div>
+          <button class="add-menu-btn" id="add-menu-btn" onclick="toggleMenuAdd()">＋ 今日のメニューに追加</button>
         </div>
-        <button class="add-menu-btn" id="add-menu-btn" onclick="toggleMenuAdd()">＋ 今日のメニューに追加</button>
-      </div>
-
-      <!-- Body diagrams -->
-      <div class="body-diagrams">
+        <!-- Body diagrams -->
+        <div class="body-diagrams">
         <!-- FRONT -->
         <div class="diagram-wrap">
           <span class="diagram-label">FRONT</span>
@@ -382,6 +419,21 @@
             <ellipse class="mr m-calf-b"     cx="35" cy="212" rx="8"  ry="18"/>
             <ellipse class="mr m-calf-b"     cx="65" cy="212" rx="8"  ry="18"/>
           </svg>
+        </div>
+        </div><!-- /.body-diagrams -->
+      </div><!-- /.menu-primary -->
+
+      <!-- SECONDARY: how to use (collapsible) -->
+      <button class="howto-toggle" id="howto-toggle" onclick="toggleHowto()">
+        <span>使い方を見る</span>
+        <i class="toggle-arrow">▼</i>
+      </button>
+      <div class="howto-content" id="howto-content">
+        <div class="section-tag">HOW TO USE</div>
+        <ol class="steps-list" id="m-steps"></ol>
+        <div class="tip-box" id="m-tip">
+          <strong>POINT</strong>
+          <span id="m-tip-text"></span>
         </div>
       </div>
     </div>
@@ -556,6 +608,21 @@ document.querySelectorAll('.machine').forEach(el => {
 });
 
 // ===== WORKOUT MENU =====
+const MENU_DEFAULTS = {
+  bench:    { sets: 4, reps: 10 },  // 大胸筋コンパウンド・筋肥大
+  smith:    { sets: 4, reps: 10 },  // コンパウンド多目的・筋肥大
+  dumbbell: { sets: 4, reps: 12 },  // 多種目・筋肥大
+  chinning: { sets: 4, reps: 8  },  // 自重コンパウンド・筋肥大
+  lat:      { sets: 4, reps: 10 },  // 広背筋コンパウンド・筋肥大
+  cable:    { sets: 3, reps: 12 },  // アイソレーション汎用・筋肥大
+  shoulder: { sets: 4, reps: 10 },  // 三角筋コンパウンド・筋肥大
+  chestfly: { sets: 3, reps: 12 },  // 大胸筋アイソレーション・筋肥大
+  row:      { sets: 4, reps: 10 },  // 背中コンパウンド・筋肥大
+  legpress: { sets: 4, reps: 10 },  // 脚コンパウンド・筋肥大
+  legcurl:  { sets: 3, reps: 12 },  // ハムアイソレーション・筋肥大
+  legext:   { sets: 3, reps: 12 },  // 大腿四頭筋アイソレーション・筋肥大
+};
+
 let workoutMenu = [];
 let currentModalKey = null;
 
@@ -571,12 +638,21 @@ function toggleMenuPanel() {
   document.getElementById('menuPanel').classList.toggle('open');
 }
 
+function toggleHowto() {
+  const btn = document.getElementById('howto-toggle');
+  const content = document.getElementById('howto-content');
+  btn.classList.toggle('open');
+  content.classList.toggle('open');
+}
+
 function toggleMenuAdd() {
   if (!currentModalKey) return;
   const idx = workoutMenu.findIndex(i => i.key === currentModalKey);
   if (idx === -1) {
     const d = DATA[currentModalKey];
-    workoutMenu.push({ key: currentModalKey, name: d.name, target: d.target, sets: 3, reps: 10 });
+    const sets = parseInt(document.getElementById('m-sets').value) || 3;
+    const reps = parseInt(document.getElementById('m-reps').value) || 10;
+    workoutMenu.push({ key: currentModalKey, name: d.name, target: d.target, sets, reps });
   } else {
     workoutMenu.splice(idx, 1);
   }
@@ -588,9 +664,13 @@ function toggleMenuAdd() {
 function updateAddBtn() {
   const btn = document.getElementById('add-menu-btn');
   if (!btn || !currentModalKey) return;
-  const inMenu = workoutMenu.some(i => i.key === currentModalKey);
+  const item = workoutMenu.find(i => i.key === currentModalKey);
+  const inMenu = !!item;
   btn.textContent = inMenu ? '✓ メニューに追加済み' : '＋ 今日のメニューに追加';
   btn.classList.toggle('added', inMenu);
+  const def = MENU_DEFAULTS[currentModalKey] || { sets: 3, reps: 10 };
+  document.getElementById('m-sets').value = item ? item.sets : def.sets;
+  document.getElementById('m-reps').value = item ? item.reps : def.reps;
 }
 
 function removeMenuItem(key) {
@@ -662,6 +742,8 @@ const _origClose = closeModal;
 closeModal = function() {
   _origClose();
   currentModalKey = null;
+  document.getElementById('howto-toggle').classList.remove('open');
+  document.getElementById('howto-content').classList.remove('open');
 };
 
 loadMenu();
