@@ -239,14 +239,13 @@
     .menu-panel-header h2 { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; }
     .set-rep-group label { font-family: 'Press Start 2P', monospace; font-size: 0.4rem; }
 
-    /* HOME SECTION */
-    .home-section {
-      max-width: 900px; margin: 1.5rem auto 0; padding: 0 1rem 2rem;
-      display: flex; flex-direction: column; gap: 1.2rem;
+    /* TOP CHARACTER BAR */
+    .char-top-bar {
+      max-width: 900px; margin: 1rem auto 0; padding: 0 1rem;
     }
     .home-char-area {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 1.4rem 1.6rem; display: flex; gap: 1.6rem; align-items: flex-start;
+      padding: 1.2rem 1.6rem; display: flex; gap: 1.6rem; align-items: flex-start;
     }
     .char-sprite { width: 120px; flex-shrink: 0; image-rendering: pixelated; }
     .char-sprite svg { width: 100%; height: auto; display: block; }
@@ -268,22 +267,49 @@
     .muscle-bar-lv {
       font-family: 'Press Start 2P', monospace; font-size: 0.6rem; min-width: 20px; text-align: right;
     }
-    /* HOME TRAINING LIST */
-    .home-menu-area {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      overflow: hidden;
+
+    /* MENU FAB */
+    .menu-fab {
+      position: fixed; bottom: 2rem; right: 1.5rem; z-index: 300;
+      background: var(--accent); border: none; color: #fff;
+      width: 56px; height: 56px; border-radius: 50%; cursor: pointer;
+      font-size: 1.5rem; box-shadow: 0 4px 16px rgba(230,57,70,0.5);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s;
     }
-    .home-menu-title {
-      font-family: 'Press Start 2P', monospace; font-size: 0.6rem;
-      padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border);
-      color: var(--accent); letter-spacing: 2px;
+    .menu-fab:hover { transform: scale(1.1); }
+    .fab-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: #fff; color: var(--accent);
+      font-size: 0.7rem; font-weight: 900;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: none; align-items: center; justify-content: center;
+    }
+    .fab-badge.show { display: flex; }
+
+    /* MENU PANEL (slide-in) */
+    .menu-panel {
+      position: fixed; top: 0; right: -420px; width: 400px; max-width: 100vw;
+      height: 100%; background: #161616; border-left: 1px solid var(--border);
+      z-index: 400; display: flex; flex-direction: column;
+      transition: right 0.3s ease; overflow: hidden;
+    }
+    .menu-panel.open { right: 0; }
+    .menu-panel-header {
+      padding: 1.4rem 1.5rem; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
     }
-    .home-menu-title .home-menu-count {
-      font-size: 0.45rem; color: var(--muted);
+    .menu-panel-header h2 {
+      font-family: 'Press Start 2P', monospace; font-size: 0.65rem;
+      letter-spacing: 2px;
     }
-    /* char-display kept for possible reuse */
-    .char-display { display: none; }
+    .menu-panel-close {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--muted); font-size: 1.2rem; cursor: pointer;
+      padding: 0.3rem 0.7rem; border-radius: 4px; line-height: 1; transition: all 0.15s;
+    }
+    .menu-panel-close:hover { color: var(--text); border-color: var(--muted); }
 
     /* COMPLETE SET BUTTON (in menu panel) */
     .menu-item-complete-btn {
@@ -332,6 +358,18 @@
   <h1>GYM MAP</h1>
   <p>マシンをタップしてトレーニング方法を確認</p>
 </header>
+
+<!-- TOP: character always visible -->
+<div class="char-top-bar">
+  <div class="home-char-area">
+    <div class="char-sprite" id="char-sprite"></div>
+    <div class="char-stats">
+      <div class="char-level" id="char-level-text">LV. 0</div>
+      <div class="muscle-bars" id="char-stats-bars"></div>
+    </div>
+  </div>
+</div>
+
 <div class="hint">ドラッグしてマシンを自由に移動できます</div>
 <div class="map-controls">
   <button class="ctrl-btn" onclick="resetPositions()">配置をリセット</button>
@@ -358,26 +396,23 @@
   </div>
 </div>
 
-<!-- HOME SECTION: character + today's training -->
-<div class="home-section">
-  <div class="home-char-area">
-    <div class="char-sprite" id="char-sprite"></div>
-    <div class="char-stats">
-      <div class="char-level" id="char-level-text">LV. 0</div>
-      <div class="muscle-bars" id="char-stats-bars"></div>
-    </div>
+<!-- MENU FAB -->
+<button class="menu-fab" onclick="toggleMenuPanel()" aria-label="今日のトレーニング">
+  📋
+  <span class="fab-badge" id="fab-badge">0</span>
+</button>
+
+<!-- MENU PANEL (slide-in) -->
+<div class="menu-panel" id="menuPanel">
+  <div class="menu-panel-header">
+    <h2>TODAY'S TRAINING</h2>
+    <button class="menu-panel-close" onclick="toggleMenuPanel()">✕</button>
   </div>
-  <div class="home-menu-area">
-    <div class="home-menu-title">
-      TODAY'S TRAINING
-      <span class="home-menu-count" id="home-menu-count"></span>
-    </div>
-    <div class="menu-list" id="menuList">
-      <div class="menu-empty" id="menuEmpty">マシンをタップして今日のメニューに追加</div>
-    </div>
-    <div class="menu-panel-footer">
-      <button class="menu-clear-btn" onclick="clearMenu()">すべてクリア</button>
-    </div>
+  <div class="menu-list" id="menuList">
+    <div class="menu-empty" id="menuEmpty">マシンをタップして今日のメニューに追加</div>
+  </div>
+  <div class="menu-panel-footer">
+    <button class="menu-clear-btn" onclick="clearMenu()">すべてクリア</button>
   </div>
 </div>
 
@@ -759,11 +794,15 @@ function clearMenu() {
   updateAddBtn();
 }
 
+function toggleMenuPanel() {
+  document.getElementById('menuPanel').classList.toggle('open');
+}
+
 function renderMenu() {
   const list  = document.getElementById('menuList');
   const empty = document.getElementById('menuEmpty');
-  const count = document.getElementById('home-menu-count');
-  if (count) count.textContent = workoutMenu.length ? `${workoutMenu.length} items` : '';
+  const badge = document.getElementById('fab-badge');
+  if (badge) { badge.textContent = workoutMenu.length; badge.classList.toggle('show', workoutMenu.length > 0); }
   if (!workoutMenu.length) {
     empty.style.display = '';
     list.querySelectorAll('.menu-item').forEach(el => el.remove());
